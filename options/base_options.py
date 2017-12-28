@@ -1,7 +1,7 @@
-import argparse
 import os
-from util import util
+import argparse
 import torch
+from util import util
 
 
 class BaseOptions():
