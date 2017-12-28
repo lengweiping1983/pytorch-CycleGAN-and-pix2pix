@@ -1,24 +1,22 @@
-import numpy as np
 import os
-import ntpath
 import time
+import ntpath
+import numpy as np
 from . import util
 from . import html
 
 
 class Visualizer():
     def __init__(self, opt):
-        # self.opt = opt
+        self.opt = opt
         self.display_id = opt.display_id
-        self.use_html = opt.isTrain and not opt.no_html
         self.win_size = opt.display_winsize
         self.name = opt.name
-        self.opt = opt
+        self.use_html = opt.isTrain and not opt.no_html
         self.saved = False
         if self.display_id > 0:
             import visdom
             self.vis = visdom.Visdom(port=opt.display_port)
-
         if self.use_html:
             self.web_dir = os.path.join(opt.checkpoints_dir, opt.name, 'web')
             self.img_dir = os.path.join(self.web_dir, 'images')
@@ -97,7 +95,7 @@ class Visualizer():
             webpage.save()
 
     # errors: dictionary of error labels and values
-    def plot_current_errors(self, epoch, counter_ratio, opt, errors):
+    def plot_current_errors(self, epoch, counter_ratio, errors):
         if not hasattr(self, 'plot_data'):
             self.plot_data = {'X': [], 'Y': [], 'legend': list(errors.keys())}
         self.plot_data['X'].append(epoch + counter_ratio)

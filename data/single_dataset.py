@@ -5,6 +5,9 @@ from data.image_folder import make_dataset
 
 
 class SingleDataset(BaseDataset):
+    def name(self):
+        return 'SingleDataset'
+
     def initialize(self, opt):
         self.opt = opt
         self.root = opt.dataroot
@@ -32,5 +35,3 @@ class SingleDataset(BaseDataset):
     def __len__(self):
         return len(self.A_paths)
 
-    def name(self):
-        return 'SingleDataset'

@@ -6,6 +6,9 @@ from data.image_folder import make_dataset
 
 
 class UnalignedDataset(BaseDataset):
+    def name(self):
+        return 'UnalignedDataset'
+
     def initialize(self, opt):
         self.opt = opt
         self.root = opt.dataroot
@@ -56,5 +59,3 @@ class UnalignedDataset(BaseDataset):
     def __len__(self):
         return max(self.A_size, self.B_size)
 
-    def name(self):
-        return 'UnalignedDataset'

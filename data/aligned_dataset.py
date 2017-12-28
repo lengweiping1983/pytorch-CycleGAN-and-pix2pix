@@ -8,6 +8,9 @@ from data.image_folder import make_dataset
 
 
 class AlignedDataset(BaseDataset):
+    def name(self):
+        return 'AlignedDataset'
+
     def initialize(self, opt):
         self.opt = opt
         self.root = opt.dataroot
@@ -63,6 +66,3 @@ class AlignedDataset(BaseDataset):
 
     def __len__(self):
         return len(self.AB_paths)
-
-    def name(self):
-        return 'AlignedDataset'

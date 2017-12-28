@@ -1,11 +1,11 @@
 import time
 from options.train_options import TrainOptions
-from data.data_loader import CreateDataLoader
+from data.data_loader import create_data_loader
 from models.models import create_model
 from util.visualizer import Visualizer
 
 opt = TrainOptions().parse()
-data_loader = CreateDataLoader(opt)
+data_loader = create_data_loader(opt)
 dataset = data_loader.load_data()
 dataset_size = len(data_loader)
 print('#training images = %d' % dataset_size)
@@ -35,7 +35,7 @@ for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
             t = (time.time() - iter_start_time) / opt.batchSize
             visualizer.print_current_errors(epoch, epoch_iter, errors, t)
             if opt.display_id > 0:
-                visualizer.plot_current_errors(epoch, float(epoch_iter)/dataset_size, opt, errors)
+                visualizer.plot_current_errors(epoch, float(epoch_iter)/dataset_size, errors)
 
         if total_steps % opt.save_latest_freq == 0:
             print('saving the latest model (epoch %d, total_steps %d)' %

@@ -50,7 +50,7 @@ class Pix2PixModel(BaseModel):
             for optimizer in self.optimizers:
                 self.schedulers.append(networks.get_scheduler(optimizer, opt))
 
-        print('---------- Networks initialized -------------')
+        print('------------ Networks initialized -------------')
         networks.print_network(self.netG)
         if self.isTrain:
             networks.print_network(self.netD)
@@ -64,12 +64,6 @@ class Pix2PixModel(BaseModel):
         self.input_B.resize_as_(input_B).copy_(input_B)
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
-    def forward(self):
-        self.real_A = Variable(self.input_A)
-        self.fake_B = self.netG(self.real_A)
-
-        self.real_B = Variable(self.input_B)
-
     # no backprop gradients
     def test(self):
         self.real_A = Variable(self.input_A, volatile=True)
@@ -77,20 +71,25 @@ class Pix2PixModel(BaseModel):
 
         self.real_B = Variable(self.input_B, volatile=True)
 
-    # get image paths
-    def get_image_paths(self):
-        return self.image_paths
+    def forward(self):
+        self.real_A = Variable(self.input_A)
+        self.fake_B = self.netG(self.real_A)
+
+        self.real_B = Variable(self.input_B)
 
     def backward_D(self):
-        # Fake
-        # stop backprop to the generator by detaching fake_B
-        fake_AB = self.fake_AB_pool.query(torch.cat((self.real_A, self.fake_B), 1).data)
-        pred_fake = self.netD(fake_AB.detach())
-        self.loss_D_fake = self.criterionGAN(pred_fake, False)
         # Real
         real_AB = torch.cat((self.real_A, self.real_B), 1)
         pred_real = self.netD(real_AB)
         self.loss_D_real = self.criterionGAN(pred_real, True)
+
+        # Fake
+        # stop backprop to the generator by detaching fake_B
+        # fake_AB = self.fake_AB_pool.query(torch.cat((self.real_A, self.fake_B), 1).data)
+        fake_AB = torch.cat((self.real_A, self.fake_B), 1)
+        pred_fake = self.netD(fake_AB.detach())
+        self.loss_D_fake = self.criterionGAN(pred_fake, False)
+
         # Combined loss
         loss_D = (self.loss_D_fake + self.loss_D_real) * 0.5
         loss_D.backward()
@@ -122,10 +121,10 @@ class Pix2PixModel(BaseModel):
         self.optimizer_G.step()
 
     def get_current_errors(self):
-        return OrderedDict([('G_GAN', self.loss_G_GAN.data[0]),
-                            ('G_L1', self.loss_G_L1.data[0]),
-                            ('D_real', self.loss_D_real.data[0]),
-                            ('D_fake', self.loss_D_fake.data[0])
+        return OrderedDict([('G_GAN', self.loss_G_GAN.data),
+                            ('G_L1', self.loss_G_L1.data),
+                            ('D_real', self.loss_D_real.data),
+                            ('D_fake', self.loss_D_fake.data)
                             ])
 
     def get_current_visuals(self):
@@ -136,6 +135,10 @@ class Pix2PixModel(BaseModel):
                             ('fake_B', fake_B),
                             ('real_B', real_B)
                             ])
+
+    # get image paths
+    def get_image_paths(self):
+        return self.image_paths
 
     def save(self, label):
         self.save_network(self.netG, 'G', label)

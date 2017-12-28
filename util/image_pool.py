@@ -1,5 +1,4 @@
 import random
-import numpy as np
 import torch
 from torch.autograd import Variable
 
@@ -8,7 +7,7 @@ class ImagePool():
     def __init__(self, pool_size):
         self.pool_size = pool_size
         if self.pool_size > 0:
-            self.num_imgs = 0
+            self.imgs_size = 0
             self.images = []
 
     def query(self, images):
@@ -17,8 +16,8 @@ class ImagePool():
         return_images = []
         for image in images:
             image = torch.unsqueeze(image, 0)
-            if self.num_imgs < self.pool_size:
-                self.num_imgs = self.num_imgs + 1
+            if self.imgs_size < self.pool_size:
+                self.imgs_size = self.imgs_size + 1
                 self.images.append(image)
                 return_images.append(image)
             else:

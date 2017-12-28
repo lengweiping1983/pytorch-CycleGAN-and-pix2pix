@@ -1,6 +1,6 @@
+import os
 import dominate
 from dominate.tags import *
-import os
 
 
 class HTML:
@@ -12,7 +12,6 @@ class HTML:
             os.makedirs(self.web_dir)
         if not os.path.exists(self.img_dir):
             os.makedirs(self.img_dir)
-        # print(self.img_dir)
 
         self.doc = dominate.document(title=title)
         if reflesh > 0:

@@ -22,7 +22,7 @@ class TestModel(BaseModel):
                                       opt.norm, not opt.no_dropout, opt.init_type, self.gpu_ids)
         self.load_network(self.netG, 'G', opt.which_epoch)
 
-        print('---------- Networks initialized -------------')
+        print('------------ Networks initialized -------------')
         networks.print_network(self.netG)
         print('-----------------------------------------------')
 
@@ -36,13 +36,13 @@ class TestModel(BaseModel):
         self.real_A = Variable(self.input_A, volatile=True)
         self.fake_B = self.netG(self.real_A)
 
-    # get image paths
-    def get_image_paths(self):
-        return self.image_paths
-
     def get_current_visuals(self):
         real_A = util.tensor2im(self.real_A.data)
         fake_B = util.tensor2im(self.fake_B.data)
         return OrderedDict([('real_A', real_A),
                             ('fake_B', fake_B)
                             ])
+
+    # get image paths
+    def get_image_paths(self):
+        return self.image_paths

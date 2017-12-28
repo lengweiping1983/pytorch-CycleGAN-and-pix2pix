@@ -64,7 +64,7 @@ class CycleGANModel(BaseModel):
             for optimizer in self.optimizers:
                 self.schedulers.append(networks.get_scheduler(optimizer, opt))
 
-        print('---------- Networks initialized -------------')
+        print('------------ Networks initialized -------------')
         networks.print_network(self.netG_A)
         networks.print_network(self.netG_B)
         if self.isTrain:
@@ -80,15 +80,6 @@ class CycleGANModel(BaseModel):
         self.input_B.resize_as_(input_B).copy_(input_B)
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
-    def forward(self):
-        self.real_A = Variable(self.input_A)
-        self.fake_B = self.netG_A(self.real_A)
-        self.rec_A = self.netG_B(self.fake_B)
-
-        self.real_B = Variable(self.input_B)
-        self.fake_A = self.netG_B(self.real_B)
-        self.rec_B = self.netG_A(self.fake_A)
-
     # no backprop gradients
     def test(self):
         self.real_A = Variable(self.input_A, volatile=True)
@@ -99,17 +90,24 @@ class CycleGANModel(BaseModel):
         self.fake_A = self.netG_B(self.real_B)
         self.rec_B = self.netG_A(self.fake_A)
 
-    # get image paths
-    def get_image_paths(self):
-        return self.image_paths
+    def forward(self):
+        self.real_A = Variable(self.input_A)
+        self.fake_B = self.netG_A(self.real_A)
+        self.rec_A = self.netG_B(self.fake_B)
+
+        self.real_B = Variable(self.input_B)
+        self.fake_A = self.netG_B(self.real_B)
+        self.rec_B = self.netG_A(self.fake_A)
 
     def backward_D_basic(self, netD, real, fake):
         # Real
         pred_real = netD(real)
         loss_D_real = self.criterionGAN(pred_real, True)
+
         # Fake
         pred_fake = netD(fake.detach())
         loss_D_fake = self.criterionGAN(pred_fake, False)
+
         # Combined loss
         loss_D = (loss_D_real + loss_D_fake) * 0.5
         # backward
@@ -117,12 +115,12 @@ class CycleGANModel(BaseModel):
         return loss_D
 
     def backward_D_A(self):
-        fake_B = self.fake_B_pool.query(self.fake_B.data)
-        self.loss_D_A = self.backward_D_basic(self.netD_A, self.real_B, fake_B)
+        # fake_B = self.fake_B_pool.query(self.fake_B.data)
+        self.loss_D_A = self.backward_D_basic(self.netD_A, self.real_B, self.fake_B)
 
     def backward_D_B(self):
-        fake_A = self.fake_A_pool.query(self.fake_A.data)
-        self.loss_D_B = self.backward_D_basic(self.netD_B, self.real_A, fake_A)
+        # fake_A = self.fake_A_pool.query(self.fake_A.data)
+        self.loss_D_B = self.backward_D_basic(self.netD_B, self.real_A, self.fake_A)
 
     def backward_G(self):
         # GAN loss D_A(G_A(A))
@@ -154,7 +152,6 @@ class CycleGANModel(BaseModel):
 
             # Combined loss
             loss_G = loss_G + self.loss_idt_A + self.loss_idt_B
-
         loss_G.backward()
 
     def optimize_parameters(self):
@@ -176,16 +173,16 @@ class CycleGANModel(BaseModel):
         self.optimizer_G.step()
 
     def get_current_errors(self):
-        ret_errors = OrderedDict([('D_A', self.loss_D_A.data[0]),
-                                  ('G_A', self.loss_G_A.data[0]),
-                                  ('Cyc_A', self.loss_cycle_A.data[0]),
-                                  ('D_B', self.loss_D_B.data[0]),
-                                  ('G_B', self.loss_G_B.data[0]),
-                                  ('Cyc_B',  self.loss_cycle_B.data[0])
+        ret_errors = OrderedDict([('D_A', self.loss_D_A.data),
+                                  ('G_A', self.loss_G_A.data),
+                                  ('Cyc_A', self.loss_cycle_A.data),
+                                  ('D_B', self.loss_D_B.data),
+                                  ('G_B', self.loss_G_B.data),
+                                  ('Cyc_B', self.loss_cycle_B.data)
                                   ])
         if self.opt.isTrain and self.opt.identity > 0.0:
-            ret_errors['idt_A'] = self.loss_idt_A.data[0]
-            ret_errors['idt_B'] = self.loss_idt_B.data[0]
+            ret_errors['idt_A'] = self.loss_idt_A.data
+            ret_errors['idt_B'] = self.loss_idt_B.data
         return ret_errors
 
     def get_current_visuals(self):
@@ -206,6 +203,10 @@ class CycleGANModel(BaseModel):
             ret_visuals['idt_A'] = util.tensor2im(self.idt_A.data)
             ret_visuals['idt_B'] = util.tensor2im(self.idt_B.data)
         return ret_visuals
+
+    # get image paths
+    def get_image_paths(self):
+        return self.image_paths
 
     def save(self, label):
         self.save_network(self.netG_A, 'G_A', label)

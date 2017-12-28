@@ -1,6 +1,6 @@
 import os
 from options.test_options import TestOptions
-from data.data_loader import CreateDataLoader
+from data.data_loader import create_data_loader
 from models.models import create_model
 from util.visualizer import Visualizer
 from util import html
@@ -11,7 +11,7 @@ opt.batchSize = 1  # test code only supports batchSize = 1
 opt.serial_batches = True  # no shuffle
 opt.no_flip = True  # no flip
 
-data_loader = CreateDataLoader(opt)
+data_loader = create_data_loader(opt)
 dataset = data_loader.load_data()
 model = create_model(opt)
 visualizer = Visualizer(opt)
