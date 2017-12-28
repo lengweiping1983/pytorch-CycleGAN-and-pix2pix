@@ -12,15 +12,15 @@ class TestModel(BaseModel):
     def initialize(self, opt):
         assert(not opt.isTrain)
         BaseModel.initialize(self, opt)
+
+        # define tensors
         self.input_A = self.Tensor(opt.batchSize, opt.input_nc, opt.fineSize, opt.fineSize)
 
-        self.netG = networks.define_G(opt.input_nc, opt.output_nc,
-                                      opt.ngf, opt.which_model_netG,
-                                      opt.norm, not opt.no_dropout,
-                                      opt.init_type,
-                                      self.gpu_ids)
-        which_epoch = opt.which_epoch
-        self.load_network(self.netG, 'G', which_epoch)
+        # load/define networks
+        self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf,
+                                      opt.which_model_netG,
+                                      opt.norm, not opt.no_dropout, opt.init_type, self.gpu_ids)
+        self.load_network(self.netG, 'G', opt.which_epoch)
 
         print('---------- Networks initialized -------------')
         networks.print_network(self.netG)
@@ -33,7 +33,7 @@ class TestModel(BaseModel):
         self.image_paths = input['A_paths']
 
     def test(self):
-        self.real_A = Variable(self.input_A)
+        self.real_A = Variable(self.input_A, volatile=True)
         self.fake_B = self.netG(self.real_A)
 
     # get image paths
