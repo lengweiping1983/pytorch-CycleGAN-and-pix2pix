@@ -1,10 +1,9 @@
 import os.path
-import torchvision.transforms as transforms
+import random
 from data.base_dataset import BaseDataset, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
-import PIL
-import random
+
 
 class UnalignedDataset(BaseDataset):
     def initialize(self, opt):
@@ -23,14 +22,14 @@ class UnalignedDataset(BaseDataset):
         self.transform = get_transform(opt)
 
     def __getitem__(self, index):
-        A_path = self.A_paths[index % self.A_size]
-        index_A = index % self.A_size
+        A_index = index % self.A_size
+        A_path = self.A_paths[A_index]
         if self.opt.serial_batches:
-            index_B = index % self.B_size
+            B_index = index % self.B_size
         else:
-            index_B = random.randint(0, self.B_size - 1)
-        B_path = self.B_paths[index_B]
-        # print('(A, B) = (%d, %d)' % (index_A, index_B))
+            B_index = random.randint(0, self.B_size - 1)
+        B_path = self.B_paths[B_index]
+        # print('(A, B) = (%d, %d)' % (A_index, B_index))
         A_img = Image.open(A_path).convert('RGB')
         B_img = Image.open(B_path).convert('RGB')
 

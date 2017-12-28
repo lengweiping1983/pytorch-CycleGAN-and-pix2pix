@@ -117,11 +117,11 @@ class CycleGANModel(BaseModel):
         return loss_D
 
     def backward_D_A(self):
-        fake_B = self.fake_B_pool.query(self.fake_B)
+        fake_B = self.fake_B_pool.query(self.fake_B.data)
         self.loss_D_A = self.backward_D_basic(self.netD_A, self.real_B, fake_B)
 
     def backward_D_B(self):
-        fake_A = self.fake_A_pool.query(self.fake_A)
+        fake_A = self.fake_A_pool.query(self.fake_A.data)
         self.loss_D_B = self.backward_D_basic(self.netD_B, self.real_A, fake_A)
 
     def backward_G(self):
@@ -176,9 +176,11 @@ class CycleGANModel(BaseModel):
         self.optimizer_G.step()
 
     def get_current_errors(self):
-        ret_errors = OrderedDict([('D_A', self.loss_D_A.data[0]), ('G_A', self.loss_G_A.data[0]),
+        ret_errors = OrderedDict([('D_A', self.loss_D_A.data[0]),
+                                  ('G_A', self.loss_G_A.data[0]),
                                   ('Cyc_A', self.loss_cycle_A.data[0]),
-                                 ('D_B', self.loss_D_B.data[0]), ('G_B', self.loss_G_B.data[0]),
+                                  ('D_B', self.loss_D_B.data[0]),
+                                  ('G_B', self.loss_G_B.data[0]),
                                   ('Cyc_B',  self.loss_cycle_B.data[0])
                                   ])
         if self.opt.isTrain and self.opt.identity > 0.0:
@@ -193,8 +195,13 @@ class CycleGANModel(BaseModel):
         real_B = util.tensor2im(self.real_B.data)
         fake_A = util.tensor2im(self.fake_A.data)
         rec_B = util.tensor2im(self.rec_B.data)
-        ret_visuals = OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('rec_A', rec_A),
-                                   ('real_B', real_B), ('fake_A', fake_A), ('rec_B', rec_B)])
+        ret_visuals = OrderedDict([('real_A', real_A),
+                                   ('fake_B', fake_B),
+                                   ('rec_A', rec_A),
+                                   ('real_B', real_B),
+                                   ('fake_A', fake_A),
+                                   ('rec_B', rec_B)
+                                   ])
         if self.opt.isTrain and self.opt.identity > 0.0:
             ret_visuals['idt_A'] = util.tensor2im(self.idt_A.data)
             ret_visuals['idt_B'] = util.tensor2im(self.idt_B.data)

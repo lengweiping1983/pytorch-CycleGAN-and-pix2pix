@@ -67,12 +67,14 @@ class Pix2PixModel(BaseModel):
     def forward(self):
         self.real_A = Variable(self.input_A)
         self.fake_B = self.netG(self.real_A)
+
         self.real_B = Variable(self.input_B)
 
     # no backprop gradients
     def test(self):
         self.real_A = Variable(self.input_A, volatile=True)
         self.fake_B = self.netG(self.real_A)
+
         self.real_B = Variable(self.input_B, volatile=True)
 
     # get image paths
@@ -130,7 +132,10 @@ class Pix2PixModel(BaseModel):
         real_A = util.tensor2im(self.real_A.data)
         fake_B = util.tensor2im(self.fake_B.data)
         real_B = util.tensor2im(self.real_B.data)
-        return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B)])
+        return OrderedDict([('real_A', real_A),
+                            ('fake_B', fake_B),
+                            ('real_B', real_B)
+                            ])
 
     def save(self, label):
         self.save_network(self.netG, 'G', label)
