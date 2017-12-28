@@ -29,7 +29,7 @@ class TestModel(BaseModel):
     def set_input(self, input):
         # we need to use single_dataset mode
         input_A = input['A']
-        self.input_A.resize_(input_A.size()).copy_(input_A)
+        self.input_A.resize_as_(input_A).copy_(input_A)
         self.image_paths = input['A_paths']
 
     def test(self):
