@@ -1,8 +1,7 @@
 import os.path
-import torchvision.transforms as transforms
+from PIL import Image
 from data.base_dataset import BaseDataset, get_transform
 from data.image_folder import make_dataset
-from PIL import Image
 
 
 class SingleDataset(BaseDataset):
@@ -12,9 +11,7 @@ class SingleDataset(BaseDataset):
         self.dir_A = os.path.join(opt.dataroot)
 
         self.A_paths = make_dataset(self.dir_A)
-
         self.A_paths = sorted(self.A_paths)
-
         self.transform = get_transform(opt)
 
     def __getitem__(self, index):
@@ -36,4 +33,4 @@ class SingleDataset(BaseDataset):
         return len(self.A_paths)
 
     def name(self):
-        return 'SingleImageDataset'
+        return 'SingleDataset'

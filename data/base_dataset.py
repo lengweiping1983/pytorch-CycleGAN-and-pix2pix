@@ -1,6 +1,7 @@
 import torch.utils.data as data
-from PIL import Image
 import torchvision.transforms as transforms
+from PIL import Image
+
 
 class BaseDataset(data.Dataset):
     def __init__(self):
@@ -12,11 +13,11 @@ class BaseDataset(data.Dataset):
     def initialize(self, opt):
         pass
 
+
 def get_transform(opt):
     transform_list = []
     if opt.resize_or_crop == 'resize_and_crop':
-        osize = [opt.loadSize, opt.loadSize]
-        transform_list.append(transforms.Resize(osize, Image.BICUBIC))
+        transform_list.append(transforms.Resize(opt.loadSize, Image.BICUBIC))
         transform_list.append(transforms.RandomCrop(opt.fineSize))
     elif opt.resize_or_crop == 'crop':
         transform_list.append(transforms.RandomCrop(opt.fineSize))
@@ -35,6 +36,7 @@ def get_transform(opt):
                        transforms.Normalize((0.5, 0.5, 0.5),
                                             (0.5, 0.5, 0.5))]
     return transforms.Compose(transform_list)
+
 
 def __scale_width(img, target_width):
     ow, oh = img.size
