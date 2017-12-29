@@ -39,7 +39,6 @@ class Pix2PixModel(BaseModel):
             self.criterionL1 = torch.nn.L1Loss()
 
             # initialize optimizers
-            self.schedulers = []
             self.optimizers = []
             self.optimizer_G = torch.optim.Adam(self.netG.parameters(),
                                                 lr=opt.lr, betas=(opt.beta1, 0.999))
@@ -47,14 +46,13 @@ class Pix2PixModel(BaseModel):
                                                 lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizers.append(self.optimizer_G)
             self.optimizers.append(self.optimizer_D)
-            for optimizer in self.optimizers:
-                self.schedulers.append(networks.get_scheduler(optimizer, opt))
+            self.set_scheduler(self.optimizers)
 
-        print('------------ Networks initialized -------------')
+        print('------------- Networks initialized -------------')
         networks.print_network(self.netG)
         if self.isTrain:
             networks.print_network(self.netD)
-        print('-----------------------------------------------')
+        print('------------------------------------------------')
 
     def set_input(self, input):
         AtoB = self.opt.which_direction == 'AtoB'
@@ -121,10 +119,10 @@ class Pix2PixModel(BaseModel):
         self.optimizer_G.step()
 
     def get_current_errors(self):
-        return OrderedDict([('G_GAN', self.loss_G_GAN.data),
-                            ('G_L1', self.loss_G_L1.data),
-                            ('D_real', self.loss_D_real.data),
-                            ('D_fake', self.loss_D_fake.data)
+        return OrderedDict([('G_GAN', self.loss_G_GAN.data[0]),
+                            ('G_L1', self.loss_G_L1.data[0]),
+                            ('D_real', self.loss_D_real.data[0]),
+                            ('D_fake', self.loss_D_fake.data[0])
                             ])
 
     def get_current_visuals(self):

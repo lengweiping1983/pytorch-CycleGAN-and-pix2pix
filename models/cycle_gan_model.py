@@ -52,7 +52,6 @@ class CycleGANModel(BaseModel):
             self.criterionIdt = torch.nn.L1Loss()
 
             # initialize optimizers
-            self.schedulers = []
             self.optimizers = []
             self.optimizer_G = torch.optim.Adam(itertools.chain(self.netG_A.parameters(), self.netG_B.parameters()),
                                                 lr=opt.lr, betas=(opt.beta1, 0.999))
@@ -61,16 +60,15 @@ class CycleGANModel(BaseModel):
             self.optimizers.append(self.optimizer_G)
             self.optimizers.append(self.optimizer_D_A)
             self.optimizers.append(self.optimizer_D_B)
-            for optimizer in self.optimizers:
-                self.schedulers.append(networks.get_scheduler(optimizer, opt))
+            self.set_scheduler(self.optimizers)
 
-        print('------------ Networks initialized -------------')
+        print('------------- Networks initialized -------------')
         networks.print_network(self.netG_A)
         networks.print_network(self.netG_B)
         if self.isTrain:
             networks.print_network(self.netD_A)
             networks.print_network(self.netD_B)
-        print('-----------------------------------------------')
+        print('------------------------------------------------')
 
     def set_input(self, input):
         AtoB = self.opt.which_direction == 'AtoB'
@@ -173,16 +171,16 @@ class CycleGANModel(BaseModel):
         self.optimizer_G.step()
 
     def get_current_errors(self):
-        ret_errors = OrderedDict([('D_A', self.loss_D_A.data),
-                                  ('G_A', self.loss_G_A.data),
-                                  ('Cyc_A', self.loss_cycle_A.data),
-                                  ('D_B', self.loss_D_B.data),
-                                  ('G_B', self.loss_G_B.data),
-                                  ('Cyc_B', self.loss_cycle_B.data)
+        ret_errors = OrderedDict([('D_A', self.loss_D_A.data[0]),
+                                  ('G_A', self.loss_G_A.data[0]),
+                                  ('Cyc_A', self.loss_cycle_A.data[0]),
+                                  ('D_B', self.loss_D_B.data[0]),
+                                  ('G_B', self.loss_G_B.data[0]),
+                                  ('Cyc_B', self.loss_cycle_B.data[0])
                                   ])
         if self.opt.isTrain and self.opt.identity > 0.0:
-            ret_errors['idt_A'] = self.loss_idt_A.data
-            ret_errors['idt_B'] = self.loss_idt_B.data
+            ret_errors['idt_A'] = self.loss_idt_A.data[0]
+            ret_errors['idt_B'] = self.loss_idt_B.data[0]
         return ret_errors
 
     def get_current_visuals(self):

@@ -1,5 +1,6 @@
 import os
 import torch
+from torch.optim import lr_scheduler
 
 
 class BaseModel():
@@ -58,3 +59,23 @@ class BaseModel():
             scheduler.step()
         lr = self.optimizers[0].param_groups[0]['lr']
         print('learning rate = %.7f' % lr)
+
+    def get_scheduler(self, optimizer):
+        opt = self.opt
+        if opt.lr_policy == 'lambda':
+            def lambda_rule(epoch):
+                lr_l = 1.0 - max(0, epoch + opt.epoch_count - opt.niter) / float(opt.niter_decay + 1)
+                return lr_l
+            scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_rule)
+        elif opt.lr_policy == 'step':
+            scheduler = lr_scheduler.StepLR(optimizer, step_size=opt.lr_decay_iters, gamma=0.1)
+        elif opt.lr_policy == 'plateau':
+            scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.2, threshold=0.01, patience=5)
+        else:
+            return NotImplementedError('learning rate policy [%s] is not implemented', opt.lr_policy)
+        return scheduler
+
+    def set_scheduler(self, optimizers):
+        self.schedulers = []
+        for optimizer in optimizers:
+            self.schedulers.append(self.get_scheduler(optimizer))

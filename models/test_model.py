@@ -22,9 +22,9 @@ class TestModel(BaseModel):
                                       opt.norm, not opt.no_dropout, opt.init_type, self.gpu_ids)
         self.load_network(self.netG, 'G', opt.which_epoch)
 
-        print('------------ Networks initialized -------------')
+        print('------------- Networks initialized -------------')
         networks.print_network(self.netG)
-        print('-----------------------------------------------')
+        print('------------------------------------------------')
 
     def set_input(self, input):
         # we need to use single_dataset mode
